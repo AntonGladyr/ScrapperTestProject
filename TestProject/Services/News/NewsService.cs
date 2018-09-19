@@ -17,19 +17,22 @@ namespace TestProject.Services
             var bbcNewsTask = GetApiServiceNewsAsync("bbc-news");
             await Task.WhenAll(redditNewsTask, googleNewsTask, bbcNewsTask);
 
-            List<News> newsList = redditNewsTask.Result.ToList().ConvertAll(
+            Console.WriteLine("Hello world");
+            Console.WriteLine(redditNewsTask.Result.Children.First().Data.Author);
+            List<News> newsList = redditNewsTask.Result.Children.ToList().ConvertAll(
                 x => new News(
-                    x.Author,
-                    x.Title,
-                    x.Permalink,
-                    x.ImageURL,
-                    x.ReleaseDate,
-                    x.ID,
+                    x.Data.Author,
+                    x.Data.Title,
+                    x.Data.Permalink,
+                    x.Data.Preview != null ? x.Data.Preview.Images.First().Source.Url : null,
+                    //x.ReleaseDate,
+                    DateTime.Now,
+                    x.Data.ID,
                     String.Empty,
                     String.Empty,
                     String.Empty,
                     String.Empty,
-                    x.SubredditName
+                    x.Data.SubredditName
                 )
             ).Union(googleNewsTask.Result.ToList().ConvertAll(
                 y => new News(
@@ -63,16 +66,14 @@ namespace TestProject.Services
             return newsList;
         }
 
-        private async Task<IList<RedditNews>> GetRedditNewsAsync()
+        private async Task<RedditData> GetRedditNewsAsync()
         {
             string url = NewsEndpointBuilder.GetRedditNewsURL();
             var response = await NetwrokService.Instance.GetRequestResultAsync(url);
             JObject dataResult = JObject.Parse(response);
-
-            // get JSON result objects into a list
-            IList<JToken> results = dataResult["data"]["children"].Children().ToList();
-            NewsSerializer<RedditNews> redditNewsList = new NewsSerializer<RedditNews>();
-            return redditNewsList.SerializeNewsList(results);
+            JToken result = dataResult["data"];
+            RedditData redditData = result.ToObject<RedditData>();
+            return redditData;
         }
 
         private async Task<IList<ApiServiceNews>> GetApiServiceNewsAsync(string sources)

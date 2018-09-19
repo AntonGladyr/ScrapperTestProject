@@ -16,6 +16,7 @@
     <Folder Include="Services\" />
     <Folder Include="Models\News\" />
     <Folder Include="Services\News\" />
+    <Folder Include="Models\News\Reddit\" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="Models\News\NewsDetail.cs" />
