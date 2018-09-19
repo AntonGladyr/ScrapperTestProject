@@ -5,14 +5,17 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TestProject.Models;
+using TestProject.Services;
 
 namespace TestProject.Controllers
 {
     public class HomeController : Controller
     {
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            NewsService newsService = new NewsService();
+            IList<News> newsList = await newsService.GetNewsListAsync();
+            return View(newsList);
         }
 
         public IActionResult About()
