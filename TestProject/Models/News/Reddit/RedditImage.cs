@@ -8,7 +8,8 @@ namespace TestProject.Models
     {
         [JsonProperty("source")]
         public RedditImageSource Source { get; set; }
-        //[JsonProperty("id")]
-        //public string Id { get; set; }
+
+        [JsonProperty("id")]
+        public string Id { get; set; }
     }
 }

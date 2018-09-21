@@ -12,18 +12,17 @@ namespace TestProject.Services
     {
         public async Task<IList<News>> GetNewsListAsync()
         {
+            //TODO: Create enum for news vebservices
             var redditNewsTask = GetRedditNewsAsync();
             var googleNewsTask = GetApiServiceNewsAsync("google-news");
             var bbcNewsTask = GetApiServiceNewsAsync("bbc-news");
             await Task.WhenAll(redditNewsTask, googleNewsTask, bbcNewsTask);
 
-            Console.WriteLine("Hello world");
-            Console.WriteLine(redditNewsTask.Result.Children.First().Data.Author);
             List<News> newsList = redditNewsTask.Result.Children.ToList().ConvertAll(
                 x => new News(
                     x.Data.Author,
                     x.Data.Title,
-                    x.Data.Permalink,
+                    "reddit.com" + x.Data.Permalink,
                     x.Data.Preview != null ? x.Data.Preview.Images.First().Source.Url : null,
                     //x.ReleaseDate,
                     DateTime.Now,
@@ -78,6 +77,7 @@ namespace TestProject.Services
 
         private async Task<IList<ApiServiceNews>> GetApiServiceNewsAsync(string sources)
         {
+            //TODO: Add enum for languages and sources
             string url = NewsEndpointBuilder.GetNewsApiURL(sources, "en", "1");
             var response = await NetwrokService.Instance.GetRequestResultAsync(url);
             JObject dataResult = JObject.Parse(response);

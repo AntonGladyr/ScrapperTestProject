@@ -1,0 +1,17 @@
+﻿@model IEnumerable<TestProject.Models.News>
+
+@foreach (var item in Model)
+{
+    <div class="col-xs-6 col-md-3 portfolio -item">
+        <div class="thumbnail">
+            <img src="@(item.ImageURL ?? "https://www.silvercompany.co.uk/images/no_image_available.png")" alt="">
+            <div class="caption">
+                @*<h3>
+                        <a href="@item.Permalink">@item.Title</a>
+                </h3>*@
+                @*<p>@item.Description</p>*@
+                <p><a href="http://@item.Permalink" class="btn btn-primary" role="button">Open news</a>
+            </div>
+        </div>
+    </div>
+}

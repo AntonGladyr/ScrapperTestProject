@@ -15,7 +15,17 @@ namespace TestProject.Controllers
         {
             NewsService newsService = new NewsService();
             IList<News> newsList = await newsService.GetNewsListAsync();
+            ViewBag.RedditAfterID = "test";
             return View(newsList);
+        }
+
+
+        public async Task<IActionResult> NewsList(string redditAfterID, string apiServicePage)
+        {
+            NewsService newsService = new NewsService();
+            IList<News> newsList = await newsService.GetNewsListAsync();
+            ViewBag.RedditAfterID = "after ajax";
+            return PartialView("_NewsListPartial", newsList);
         }
 
         public IActionResult About()
