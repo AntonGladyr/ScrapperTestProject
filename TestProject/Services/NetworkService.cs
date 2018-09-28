@@ -21,8 +21,11 @@ namespace TestProject.Services
 
         public async Task<string> GetRequestResultAsync(string url)
         {
-            string urlContents = await GetStringAsync(url);
-            return urlContents;
+            var urlContents = await GetAsync(url, HttpCompletionOption.ResponseContentRead);
+            if (urlContents.IsSuccessStatusCode)
+                return await urlContents.Content.ReadAsStringAsync();
+                        
+            return String.Empty;
         }
 
         static NetwrokService() { }

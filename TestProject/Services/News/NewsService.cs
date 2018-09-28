@@ -10,12 +10,14 @@ namespace TestProject.Services
 {
     public class NewsService
     {
-        public async Task<IList<News>> GetNewsListAsync()
+        public async Task<NewsData> GetNewsListAsync(
+            string redditAfterID = "",
+            string apiServicePage = "1")
         {
             //TODO: Create enum for news vebservices
-            var redditNewsTask = GetRedditNewsAsync();
-            var googleNewsTask = GetApiServiceNewsAsync("google-news");
-            var bbcNewsTask = GetApiServiceNewsAsync("bbc-news");
+            var redditNewsTask = GetRedditNewsAsync(redditAfterID);
+            var googleNewsTask = GetApiServiceNewsAsync("google-news", apiServicePage);
+            var bbcNewsTask = GetApiServiceNewsAsync("bbc-news", apiServicePage);
             await Task.WhenAll(redditNewsTask, googleNewsTask, bbcNewsTask);
 
             List<News> newsList = redditNewsTask.Result.Children.ToList().ConvertAll(
@@ -62,12 +64,15 @@ namespace TestProject.Services
                     String.Empty
                  ))
             ).ToList();
-            return newsList;
+            NewsData newsData = new NewsData(newsList, redditNewsTask.Result.After, apiServicePage);
+            return newsData;
         }
 
-        private async Task<RedditData> GetRedditNewsAsync()
+        private async Task<RedditData> GetRedditNewsAsync(string redditAfterID)
         {
-            string url = NewsEndpointBuilder.GetRedditNewsURL();
+            string url = NewsEndpointBuilder.GetRedditNewsURL(redditAfterID);
+            Console.WriteLine("GetRedditNewsAsync");
+            Console.WriteLine(url);
             var response = await NetwrokService.Instance.GetRequestResultAsync(url);
             JObject dataResult = JObject.Parse(response);
             JToken result = dataResult["data"];
@@ -75,10 +80,11 @@ namespace TestProject.Services
             return redditData;
         }
 
-        private async Task<IList<ApiServiceNews>> GetApiServiceNewsAsync(string sources)
+        private async Task<IList<ApiServiceNews>> GetApiServiceNewsAsync(string sources, string apiServicePage)
         {
             //TODO: Add enum for languages and sources
-            string url = NewsEndpointBuilder.GetNewsApiURL(sources, "en", "1");
+            string url = NewsEndpointBuilder.GetNewsApiURL(sources, "en", apiServicePage);
+            Console.WriteLine(url);
             var response = await NetwrokService.Instance.GetRequestResultAsync(url);
             JObject dataResult = JObject.Parse(response);
 

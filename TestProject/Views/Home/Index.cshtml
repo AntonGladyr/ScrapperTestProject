@@ -1,8 +1,9 @@
-﻿@model IEnumerable<TestProject.Models.News>
+﻿@model TestProject.Models.NewsData
 
 @{
     ViewData["Title"] = "Home Page";
 }
+
 
 <!-- Page Heading -->
 <h1 class="my-4">
@@ -10,40 +11,54 @@
     <small>Scraps data from several news services</small>
 </h1>
 
-<div class="row">
+<div class="row display-flex">
     @{ await Html.RenderPartialAsync("_NewsListPartial", Model);}
     <div id="listmore"></div>
+    <div class="loader"></div>
 </div>
 
 @section Scripts {
 <script type="text/javascript">
-        $(window).scroll(function(){
-                    if ($(window).scrollTop() == $(document).height() - $(window).height()){
-                        var redditAfterID = '@(ViewBag.RedditAfterID)';
-                        console.log(redditAfterID);
-                        GetNewsData();
-                    }
-            });
+        const PIXELS_OFFSET = 700; // For AJAX request when it is reached the bottom of the page
+        var newsPage = 1;     // For pagination with AJAX
+        var news = document.getElementById('news_' + newsPage);
+        var _inprogress = false;
 
-        function GetNewsData() {
-        $.ajax({
-            type: 'GET',
-            url: '/Home/NewsList',
-            data: {
-                "redditAfterID": "test",
-                "apiServicePage": "test"
-            },
-            dataType: 'html',
-            success: function (data) {
-                if (data != null) {
-                    $("#listmore").append(data);
-                    pageIndex++;
-                }
-            },
-            error: function () {
-                alert("Error while retrieving data!");
+        $(window).scroll(function(){
+            if (!_inprogress && $(window).scrollTop() >= $(document).height() - $(window).height() - PIXELS_OFFSET) {
+                _inprogress = true;
+                newsPage++;
+                GetNewsData(newsPage.toString());
             }
         });
+
+        function GetNewsData(nextPage) {
+            $.ajax({
+                type: 'GET',
+                url: '@Url.Action("NewsList", "Home")',
+                data: {
+                    "redditAfterID": news.dataset.redditAfter,
+                    "apiServicePage": nextPage
+                },
+                dataType: 'html',
+                send: function () {
+                    $('#loader').show();
+                },
+                success: function (data) {
+                    if (data != null) {
+                        $("#listmore").append(data);
+                    }
+                },
+                complete : function () {
+                    _inprogress = false;
+                    news = document.getElementById('news_' + newsPage);
+                    document.getElementById('news_' + newsPage);
+                    $('#loader').hide();
+                },
+                error: function () {
+                    alert("Error while retrieving data!");
+                }
+            });
     }
 </script>
 }
